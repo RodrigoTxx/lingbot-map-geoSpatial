@@ -1,0 +1,43 @@
+services:
+  # ── Backend (CPU inference API — sem GPU) ────────────────────
+  # Para usar GPU, rode: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      # Mount your checkpoint here (see volumes below)
+      - MODEL_PATH=/models/lingbot-map-long.pt
+      - UPLOAD_BASE=/data/uploads
+      # Comma-separated list of allowed CORS origins (use * for dev)
+      - CORS_ORIGINS=*
+      # CPU mode: usa PyTorch SDPA em vez de FlashInfer
+      - USE_SDPA=true
+    volumes:
+      # Read-only model checkpoint directory — place your .pt file here
+      - ./models:/models:ro
+      # Persistent upload/result storage
+      - lingbot_uploads:/data/uploads
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=5)"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ── Frontend (React + Nginx) ──────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  lingbot_uploads:

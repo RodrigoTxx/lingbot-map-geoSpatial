@@ -15,3 +15,23 @@ skyseg.onnx
 weights/
 .DS_Store
 **/.DS_Store
+
+# Node
+node_modules/
+**/node_modules/
+
+# Frontend build
+frontend/dist/
+frontend/.vite/
+
+# Models / uploads / results
+models/
+uploads/
+*.pt
+*.safetensors
+*.bin
+*.glb
+
+# Docker env
+.env
+.env.*

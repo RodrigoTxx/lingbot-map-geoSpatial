@@ -1,0 +1,43 @@
+# ── Python bytecode ───────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# ── Build artifacts ───────────────────────────────────────────
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Frontend build ────────────────────────────────────────────
+**/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ── Model checkpoints (large files, mount as volume) ──────────
+models/
+*.pt
+*.safetensors
+*.bin
+
+# ── Data / uploads ────────────────────────────────────────────
+uploads/
+tmp/
+*.mp4
+*.avi
+*.mov
+example/
+benchmark/
+
+# ── Environment / secrets ─────────────────────────────────────
+.env
+.env.*
+*.pem
+*.key
+
+# ── IDE / OS ──────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+*.swp

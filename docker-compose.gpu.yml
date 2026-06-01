@@ -1,0 +1,27 @@
+# Override para habilitar GPU via NVIDIA Container Toolkit.
+#
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build
+#
+# Pré-requisitos WSL2:
+#   1. Driver NVIDIA instalado no Windows (não dentro do WSL)
+#      https://www.nvidia.com/Download/index.aspx
+#   2. wsl --update  (dentro do PowerShell/CMD como admin)
+#   3. nvidia-smi deve funcionar dentro do WSL2
+#   4. nvidia-container-toolkit instalado no WSL2:
+#      https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+#
+services:
+  backend:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      # Usa FlashInfer (GPU) em vez de SDPA (CPU)
+      - USE_SDPA=false
