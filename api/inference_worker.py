@@ -50,6 +50,7 @@ class InferenceWorker:
         self._queue: queue.Queue[Optional[str]] = queue.Queue()
         self._thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
+        self._start_lock = threading.Lock()
 
         # Set after _load_model()
         self._model = None
@@ -61,10 +62,15 @@ class InferenceWorker:
     # ------------------------------------------------------------------
 
     def start(self) -> None:
-        self._thread = threading.Thread(
-            target=self._run, daemon=True, name="inference-worker"
-        )
-        self._thread.start()
+        with self._start_lock:
+            if self._thread and self._thread.is_alive():
+                return
+
+            self._stop_event.clear()
+            self._thread = threading.Thread(
+                target=self._run, daemon=True, name="inference-worker"
+            )
+            self._thread.start()
 
     def stop(self) -> None:
         self._stop_event.set()
@@ -91,8 +97,18 @@ class InferenceWorker:
                 "result_path": None,
                 "error": None,
             }
+
+        # Guarantee there is a live consumer before queueing the job.
+        if not self.is_alive:
+            logger.warning("Inference worker thread not alive; restarting.")
+            self.start()
+
         self._queue.put(job_id)
         logger.info("Job %s enqueued", job_id)
+
+    @property
+    def is_alive(self) -> bool:
+        return self._thread is not None and self._thread.is_alive()
 
     @property
     def model_loaded(self) -> bool:

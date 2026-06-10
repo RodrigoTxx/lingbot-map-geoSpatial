@@ -27,5 +27,6 @@ def health(request: Request):
     return {
         "status": "ok",
         "model_loaded": worker.model_loaded,
+        "worker_alive": worker.is_alive,
         "gpu": gpu_info,
     }
